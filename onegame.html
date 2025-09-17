@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reverse Tic-Tac-Toe</title>
+<style>
+  body {
+    margin:0; padding:0;
+    font-family: system-ui, sans-serif;
+    background:#0b0f14;
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    height:100vh;
+  }
+  .board {
+    width:90vmin; max-width:500px;
+    aspect-ratio:1/1;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:10px;
+  }
+  .cell {
+    background:#111926;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(40px,12vmin,80px);
+    font-weight:bold;
+    cursor:pointer;
+    transition: transform 0.25s;
+    user-select:none;
+  }
+  .cell:hover { transform:scale(1.05); }
+  .cell.x .symbol { color:#8ab6ff; }
+  .cell.o .symbol { color:#6ff3c5; }
+  .symbol {
+    opacity:0;
+    transform:scale(0.5);
+    transition: all 0.25s;
+  }
+  .cell.filled .symbol {
+    opacity:1;
+    transform:scale(1);
+  }
+  #status { margin-top:20px; text-align:center; font-size:18px; }
+</style>
+</head>
+<body>
+  <div>
+    <div id="board" class="board"></div>
+    <div id="status">Turn: X</div>
+  </div>
+
+<script>
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+
+let board = Array(9).fill(null);
+let turn = 'X';
+let gameOver = false;
+
+function createBoard(){
+  boardEl.innerHTML='';
+  for(let i=0;i<9;i++){
+    const cell=document.createElement('div');
+    cell.className='cell';
+    cell.dataset.index=i;
+    cell.innerHTML='<div class="symbol"></div>';
+    cell.addEventListener('click',()=>makeMove(i));
+    boardEl.appendChild(cell);
+  }
+}
+
+function render(){
+  for(let i=0;i<9;i++){
+    const el=boardEl.children[i];
+    el.className='cell';
+    if(board[i]){
+      el.classList.add('filled', board[i].toLowerCase());
+      el.querySelector('.symbol').textContent=board[i];
+    } else {
+      el.querySelector('.symbol').textContent='';
+    }
+  }
+  if(!gameOver){
+    statusEl.textContent=`Turn: ${turn}`;
+  }
+}
+
+function winningTriples(sym){
+  const b=board;
+  const lines=[[0,1,2],[3,4,5],[6,7,8],
+               [0,3,6],[1,4,7],[2,5,8],
+               [0,4,8],[2,4,6]];
+  return lines.filter(line=>line.every(i=>b[i]===sym));
+}
+
+function makeMove(idx){
+  if(gameOver||board[idx])return;
+  board[idx]=turn;
+  render();
+  if(winningTriples(turn).length>0){
+    statusEl.textContent=`${turn} made 3 in a row and loses!`;
+    gameOver=true;
+    return;
+  }
+  if(board.every(v=>v)) { statusEl.textContent='Draw!'; gameOver=true; return; }
+  turn=turn==='X'?'O':'X';
+  render();
+}
+
+createBoard();
+render();
+</script>
+</body>
+</html>
